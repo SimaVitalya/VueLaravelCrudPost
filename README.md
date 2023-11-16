@@ -5,6 +5,7 @@ composer install |\
 Содать бд |
 
 change db name |
+если OpenServer то запустить сервер 
 
 php artisan migrate |
 
