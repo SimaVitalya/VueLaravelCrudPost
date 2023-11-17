@@ -151,6 +151,31 @@ export default {
             });
           });
     },
+    toggleEdit(post) {
+      if (post.editing) {
+
+        axios.put(`api/post/update/${post.id}`, {
+          title: post.title,
+          content: post.content
+        }).then((res) => {
+          console.log(res);
+        });
+      }
+      post.editing = !post.editing;
+    },
+    deletePost(post) {
+      const currentPage = this.page;
+      axios.delete(`api/post/delete/${post.id}`).then((res) => {
+        this.fetchPosts(currentPage).then(() => {
+          if (this.filteredPosts.length === 0 && this.page > 1) {
+            this.page--;
+            this.fetchPosts(this.page);
+          }
+        });
+        console.log(res);
+      });
+    },
+
   },
   computed: {
     paginatedPosts() {
