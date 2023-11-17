@@ -27,9 +27,14 @@ export default {
   },
   data() {
     return {
+      test: 'test',
       loading: false
     };
   },
+  mounted() {
+    // this.$parent.parentLog(); проверяем получаем ли мы доступ к родительской функции
+  },
+
   methods: {
     toggleEdit(post) {
       if (post.editing) {
@@ -44,7 +49,9 @@ export default {
       }
       post.editing = !post.editing;
     },
+
     deletePost(post) {
+      console.log('test')
       const currentPage = this.$parent.page;
       axios.delete(`api/post/delete/${post.id}`).then((res) => {
         this.$parent.fetchPosts(currentPage).then(() => {

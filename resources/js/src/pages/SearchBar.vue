@@ -36,15 +36,24 @@ export default {
   },
   data() {
     return {
-      searchQuery: this.value
+      searchQuery: this.search
     }
   },
+  methods: {
+    indexLog() {
+      console.log('its me postiten index vue')
+    },
+
+  },
   mounted() {
-    console.log(this.filteredPosts)
+    // console.log(this.filteredPosts)
+    // this.$parent.parentLog(); получаем инфу от родетлеля
+    //  this.$parent.$refs.test.indexLoger(); // получаем инфу от дочернего в дочернем
+
   },
   watch: {
     searchQuery(val) {
-      this.$emit('searchQuery', val)
+      this.$emit('update-search-query', val)
       // console.log(val)
     }
   },

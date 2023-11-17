@@ -1,20 +1,29 @@
 <template>
   <div>
-    <post-form @post-added="fetchPosts"></post-form>
+    <post-form @post-added="fetchPosts">
+
+    </post-form>
+
+
     <div class="d-flex justify-content-between">
-      <sort-menu :loading="loading" :sort-items="sortItems" :active-sort-title="activeSortTitle"
+      <sort-menu ref="test" :loading="loading" :sort-items="sortItems" :active-sort-title="activeSortTitle"
                  @sort="sort">
 
       </sort-menu>
       <div>
         <div>
+          <!--          ref ниже не для сортировки это для проверки связей можно не писать -->
           <search-bar
+              ref="childRef"
               :loading="loading"
-              :value="searchQuery"
+              :search="searchQuery"
               :fetch-posts="fetchPosts"
               :filtered-posts="filteredPosts"
-              @searchQuery="searchQuery =$event"
+              @update-search-query="searchQuery = $event"
+
           ></search-bar>
+          <!--          выше @update-search-query="searchQuery = $event таким образом мы принимает с дочернего элемента данные из $emit и благодаря $event меняем их тут (тоесть searchQuery в родителя(тут) будет равна тому что написано в дочернем элементе )"
+                         -->
           <!--          <p>{{ searchQuery }} проверям связь межку компонентами </p>-->
         </div>
       </div>
@@ -87,10 +96,15 @@ export default {
     this.order_by = 'date';
     this.sort_by = 'desc';
     this.fetchPosts();
+    // console.log(this.$refs.childRef.indexLog());
+    // console.log(this.$refs.test.indexLoger());
 
   },
 
   methods: {
+    parentLog() {
+      console.log('its me parent component')
+    },
     async fetchPosts(page = 1) {
       this.loading = true;
       try {
@@ -112,6 +126,7 @@ export default {
         this.loading = false;
       }
     },
+
     sort(item) {
       if (item.title === "Стандартная сортировка") {
         this.activeSortTitle = "Стандартная сортировка";
