@@ -1,70 +1,27 @@
 <template>
-
   <div>
-    <h1 class="text-blue text-center mb-5">Posts</h1>
-    <v-text-field v-model="newPost.title" label="Title"></v-text-field>
-    <v-textarea v-model="newPost.content" label="Content"></v-textarea>
-    <v-btn class="mb-15" @click.prevent="storePost" size="small" color="success">Add post</v-btn>
-
+    <post-form @post-added="fetchPosts"></post-form>
     <div class="d-flex justify-content-between">
-      <div class="d-flex justify-space-between mb-15">
-        <div class="text-end ">
-          <v-menu open-on-hover>
-            <template v-slot:activator="{ props }">
-              <v-btn  :loading="loading" color="primary" v-bind="props">
-                {{ activeSortTitle }}
-              </v-btn>
-            </template>
-            <v-list>
-              <v-list-item v-for="(item, index) in sortItems"
-                           :key="index"
-                           @click="sort(item)"
-                           :ripple="{ class: 'text-purple' }"
-              >
-                <v-list-item-title>{{ item.title }}</v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-        </div>
-      </div>
-      <div >
-        <div class="mx-auto text-center">
-          <v-text-field
-              v-model="searchQuery"
-              clearable
-              label="Search by title"
-              @keydown.enter="fetchPosts(1)"
-              :disabled="loading"
-              class="no-bottom-border search-field"
-          >
-            <template #append>
-              <v-btn :loading="loading" size="small" color="primary" @click="fetchPosts(1)">search</v-btn>
-            </template>
-          </v-text-field>
-
-          <v-overlay :value="loading">
-            <v-progress-circular indeterminate size="64"></v-progress-circular>
-          </v-overlay>
-
-          <div v-if="!loading && searchQuery && !filteredPosts.length" class="text-error  mt-4">
-            Nothing found.
-          </div>
+      <sort-menu :loading="loading" :sort-items="sortItems" :active-sort-title="activeSortTitle"
+                 @sort="sort"></sort-menu>
+      <div>
+        <div>
+          <search-bar
+              :loading="loading"
+              :value="searchQuery"
+              :fetch-posts="fetchPosts"
+              :filtered-posts="filteredPosts"
+              @searchQuery="searchQuery =$event"
+          ></search-bar>
+<!--          <p>{{ searchQuery }} проверям связь межку компонентами </p>-->
         </div>
       </div>
     </div>
-
-    <v-card v-for="post in paginatedPosts()" :key="post.id" class="post-card">
-      <v-card-title>
-        <v-text-field v-model="post.title" :readonly="!post.editing" class="post-title"></v-text-field>
-      </v-card-title>
-      <v-card-text>
-        <v-textarea v-model="post.content" :readonly="!post.editing" class="post-content"></v-textarea>
-      </v-card-text>
-      <v-card-actions>
-        <v-btn @click.prevent="toggleEdit(post)" size="small" color="blue">{{ post.editing ? 'Save' : 'Edit' }}</v-btn>
-        <v-btn @click.prevent="deletePost(post)" size="small" color="error">Delete</v-btn>
-      </v-card-actions>
-    </v-card>
+    <PostItem
+        v-for="post in paginatedPosts()"
+        :key="post.id"
+        :post="post"
+    ></PostItem>
 
     <v-pagination
         class="mt-10"
@@ -73,7 +30,6 @@
         v-model="page"
         :length="totalPages"
         v-if="totalPages > 1"
-
     ></v-pagination>
 
 
@@ -82,14 +38,25 @@
 
 <script>
 import axios from "axios";
+import PostForm from "@/pages/PostForm.vue";
+import SortMenu from "@/pages/SortMenu.vue";
+import PostItem from "@/pages/PostItem.vue";
+import SearchBar from "@/pages/SearchBar.vue";
 
 export default {
   name: "Posts",
+  components: {
+    PostForm,
+    SortMenu,
+    PostItem,
+    SearchBar,
+  },
+
   data() {
     return {
       loading: false,
       searchQuery: '',
-      totalPages:0,
+      totalPages: 0,
       newPost: {
         title: "",
         content: ""
@@ -108,9 +75,9 @@ export default {
       order_by: 'title',
       sort_by: 'asc',
       perPage: 10,
-        page: 1,
-        current: 1,
-        length: 10,
+      page: 1,
+      current: 1,
+      length: 10,
     };
   },
   mounted() {
@@ -118,6 +85,7 @@ export default {
     this.order_by = 'date';
     this.sort_by = 'desc';
     this.fetchPosts();
+
   },
 
   methods: {
@@ -131,7 +99,7 @@ export default {
           'page': page,
           'per_page': this.perPage,
         });
-        console.log(response.data.posts);
+        // console.log(response.data.posts);
         this.items = response.data.posts.data;
         this.filteredPosts = response.data.posts.data;
         this.totalPages = response.data.posts.last_page;
@@ -155,13 +123,11 @@ export default {
         this.activeSortTitle = "Сортировать по имени от а до я";
         this.order_by = "title";
         this.sort_by = "asc";
-      }
-      else if (item.title === "Сортировать по дате >") {
+      } else if (item.title === "Сортировать по дате >") {
         this.activeSortTitle = "Сортировать по дате >";
         this.order_by = "date";
         this.sort_by = "desc";
-      }
-      else if (item.title === "Сортировать по дате <") {
+      } else if (item.title === "Сортировать по дате <") {
         this.activeSortTitle = "Сортировать по дате >";
         this.order_by = "date";
         this.sort_by = "asc";
@@ -238,11 +204,13 @@ export default {
 .post-content {
   min-height: 100px;
 }
-.no-bottom-border  {
+
+.no-bottom-border {
   border-bottom: none;
 }
+
 .search-field {
-  width: 600px;
+  width: 550px;
 
 }
 </style>
